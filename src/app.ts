@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
+import testRoutes from './routes/test.routes';
 
 // Load environment variables
 dotenv.config();
@@ -27,7 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-// TODO: Add route imports and middleware
+app.use('/api/test', testRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
