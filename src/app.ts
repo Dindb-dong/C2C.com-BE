@@ -6,6 +6,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import testRoutes from './routes/test.routes';
+import chatRouter from './routes/chat';
+import authRouter from './routes/auth.routes';
 
 // Load environment variables
 dotenv.config();
@@ -16,7 +18,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST']
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
   }
 });
 
@@ -29,6 +31,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/test', testRoutes);
+app.use('/api', chatRouter);
+app.use('/api/auth', authRouter);
+
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -49,4 +54,6 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-}); 
+});
+
+export default app; 
