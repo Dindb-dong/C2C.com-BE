@@ -1,10 +1,15 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../types/auth';
+
+type JwtUserPayload = {
+  id: string;
+  email: string;
+  role: string;
+};
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key';
 
-export const generateAccessToken = (user: User): string => {
+export const generateAccessToken = (user: JwtUserPayload): string => {
   return jwt.sign(
     {
       id: user.id,
@@ -16,7 +21,7 @@ export const generateAccessToken = (user: User): string => {
   );
 };
 
-export const generateRefreshToken = (user: User): string => {
+export const generateRefreshToken = (user: JwtUserPayload): string => {
   return jwt.sign(
     {
       id: user.id,
