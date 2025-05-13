@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import testRoutes from './routes/test.routes';
 import chatRouter from './routes/chat';
 import authRouter from './routes/auth.routes';
+import mentorRoutes from './routes/mentor.routes';
 
 // Load environment variables
 dotenv.config();
@@ -33,6 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/test', testRoutes);
 app.use('/api', chatRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/mentor', mentorRoutes);
 
 
 // Error handling middleware

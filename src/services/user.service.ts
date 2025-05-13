@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { User } from '../types/user.types';
 
 const prisma = new PrismaClient();
 
@@ -38,6 +39,14 @@ export class UserService {
         email: user.email,
         password: hashedPassword,
       },
+    });
+  }
+
+  // 사용자 역할 업데이트
+  async updateUserRole(userId: string, role: string): Promise<User> {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { role }
     });
   }
 } 
