@@ -1,7 +1,7 @@
 export interface Mentor {
   id: string;
   recommend_mentor_id: string; // 추천 멘토 아이디 (본인)
-  recommended_mentor_id: string; // 추천 멘토 아이디 (입력했으면 입력한 멘토 아이디)
+  recommended_mentor_id: string | null; // null 허용으로 변경
   user_id: string; // 유저 아이디 (닉네임. 예: 수학요정)
   name: string; // 이름
   title: string; // 한 줄 소개 (학력, 전공 등)
