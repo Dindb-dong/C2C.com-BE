@@ -19,6 +19,9 @@ export interface MentorCreateInput {
   name: string;
   title: string;
   description: string;
+  career: string;
+  skills: string[];
+  hourly_rate: number;
   expertise: string[];
   recommend_mentor_id?: string;//추천 멘토 아이디 (입력했으면 입력한 멘토 아이디)
   recommended_mentor_id?: string | null;
@@ -31,6 +34,9 @@ export interface MentorUpdateInput {
   name?: string;
   title?: string;
   description?: string;
+  career?: string;
+  skills?: string[];
+  hourly_rate?: number;
   expertise?: string[];
   recommended_mentor_id?: string | null;
   star_rating?: number;

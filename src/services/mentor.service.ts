@@ -24,7 +24,8 @@ export class MentorService {
         recommend_mentor_id: data.user_id, // 본인을 추천 멘토로 설정
         star_rating: data.star_rating ?? 0,
         mentor_point: data.mentor_point ?? 0,
-        is_verified: data.is_verified ?? false
+        is_verified: data.is_verified ?? false,
+        hourly_rate: data.hourly_rate ?? 0
       };
 
       return tx.mentor.create({
