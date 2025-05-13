@@ -15,15 +15,16 @@ export interface Mentor {
 }
 
 export interface MentorCreateInput {
-  recommended_mentor_id?: string; // 추천 멘토 아이디 (입력했으면 입력한 멘토 아이디)
   user_id: string;
   name: string;
   title: string;
   description: string;
   expertise: string[];
-  star_rating?: number; // 기본값 0으로 설정
-  mentor_point?: number; // 기본값 0으로 설정
-  is_verified?: boolean; // 기본값 false로 설정
+  recommend_mentor_id?: string;//추천 멘토 아이디 (입력했으면 입력한 멘토 아이디)
+  recommended_mentor_id?: string | null;
+  star_rating?: number;
+  mentor_point?: number;
+  is_verified?: boolean;
 }
 
 export interface MentorUpdateInput {
@@ -31,6 +32,10 @@ export interface MentorUpdateInput {
   title?: string;
   description?: string;
   expertise?: string[];
+  recommended_mentor_id?: string | null;
+  star_rating?: number;
+  mentor_point?: number;
+  is_verified?: boolean;
 }
 
 export interface MentoringRequest {

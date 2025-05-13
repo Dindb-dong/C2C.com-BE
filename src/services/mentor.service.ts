@@ -14,16 +14,22 @@ export class MentorService {
   // 멘토 생성
   async createMentor(data: MentorCreateInput): Promise<Mentor> {
     // 트랜잭션으로 멘토 생성과 사용자 역할 업데이트를 함께 처리
-    return this.prisma.$transaction(async (tx: PrismaClient) => {
+    return this.prisma.$transaction(async (tx: any) => {
       // 1. 사용자 역할을 'mentor'로 업데이트
       await this.userService.updateUserRole(data.user_id, 'mentor');
 
       // 2. 멘토 프로필 생성
-      const mentor = await tx.mentor.create({
-        data
-      });
+      const mentorData = {
+        ...data,
+        recommend_mentor_id: data.user_id, // 본인을 추천 멘토로 설정
+        star_rating: data.star_rating ?? 0,
+        mentor_point: data.mentor_point ?? 0,
+        is_verified: data.is_verified ?? false
+      };
 
-      return mentor;
+      return tx.mentor.create({
+        data: mentorData
+      });
     });
   }
 

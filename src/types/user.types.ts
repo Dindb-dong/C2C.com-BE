@@ -3,9 +3,9 @@ export interface User {
   email: string;
   password: string;
   name: string;
-  role: 'user' | 'mentor' | 'admin';
-  created_at: Date;
-  updated_at: Date;
+  role: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface UserCreateInput {
