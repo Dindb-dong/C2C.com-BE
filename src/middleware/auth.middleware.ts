@@ -1,28 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyAccessToken } from '../utils/jwt';
+import jwt from 'jsonwebtoken';
+import { User } from '../types/user.types';
 
 export interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
+  user?: User;
 }
 
-export const authenticateToken = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token is required' });
+  }
+
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      return res.status(401).json({ error: 'Access token is required' });
-    }
-
-    const decoded = verifyAccessToken(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as User;
     req.user = decoded;
     next();
   } catch (error) {
