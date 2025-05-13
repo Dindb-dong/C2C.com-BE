@@ -9,7 +9,7 @@
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "postinstall": "npm run build && prisma generate"
+    "postinstall": "npm run build && npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",

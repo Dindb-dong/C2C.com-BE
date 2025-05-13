@@ -3,6 +3,9 @@ import { Mentor, MentorCreateInput, MentorUpdateInput } from '../types/mentor.ty
 
 const prisma = new PrismaClient();
 
+// Force Prisma to recognize the mentor model
+prisma.$connect();
+
 export class MentorService {
   // 멘토 생성
   async createMentor(input: MentorCreateInput): Promise<Mentor> {
