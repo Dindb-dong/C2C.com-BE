@@ -1,4 +1,3 @@
-
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
@@ -26,6 +25,19 @@ export class UserService {
   async findById(id: string) {
     return prisma.user.findUnique({
       where: { id },
+    });
+  }
+
+  async updateUser(user: { id: string; name: string; email: string; password: string }) {
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+
+    return prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: user.name,
+        email: user.email,
+        password: hashedPassword,
+      },
     });
   }
 } 

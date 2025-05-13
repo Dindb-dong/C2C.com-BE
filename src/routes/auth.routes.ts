@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
-import { LoginRequest, SignupRequest, AuthResponse, RefreshTokenRequest } from '../types/auth';
+import { LoginRequest, SignupRequest, AuthResponse, RefreshTokenRequest, UpdateUserRequest } from '../types/auth';
 import { authenticateToken, AuthRequest } from '../middleware/auth.middleware';
 import { UserService } from '../services/user.service';
 
@@ -105,7 +105,7 @@ router.post('/refresh', async (req, res) => {
 });
 
 // 현재 사용자 정보 조회
-router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
+router.get('/my-profile', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const user = await userService.findById(req.user?.id || '');
     if (!user) {
@@ -121,6 +121,32 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ error: 'Failed to get user information' });
+  }
+});
+
+router.put('/my-profile', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { name, email, password }: UpdateUserRequest = req.body;
+    const user = await userService.findById(req.user?.id || '');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.name = name;
+    user.email = email;
+    user.password = password;
+
+    await userService.updateUser(user);
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Failed to update user information' });
   }
 });
 

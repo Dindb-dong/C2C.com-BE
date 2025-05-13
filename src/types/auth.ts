@@ -26,4 +26,10 @@ export interface RefreshTokenRequest {
 
 export interface RefreshTokenResponse {
   accessToken: string;
+}
+
+export interface UpdateUserRequest {
+  name: string;
+  email: string;
+  password: string;
 } 
