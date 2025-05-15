@@ -12,8 +12,7 @@
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "postinstall": "npx prisma generate",
-    "prestart": "npx prisma generate && npx prisma db push"
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
