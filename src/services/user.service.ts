@@ -49,4 +49,33 @@ export class UserService {
       data: { role }
     });
   }
+
+  async setResetToken(email: string, token: string, expiry: Date) {
+    return prisma.user.update({
+      where: { email },
+      data: {
+        resetToken: token,
+        resetTokenExpiry: expiry,
+      },
+    });
+  }
+
+  // 토큰으로 사용자 찾기
+  async findByResetToken(token: string) {
+    return prisma.user.findFirst({
+      where: { resetToken: token },
+    });
+  }
+
+  // 비밀번호 변경 및 토큰 무효화
+  async updatePasswordAndClearToken(userId: string, hashedPassword: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+  }
 } 

@@ -23,6 +23,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   mentor    Mentor?  // User와 Mentor 간의 1:1 관계
+  resetToken        String?   // 비밀번호 재설정 토큰
+  resetTokenExpiry  DateTime? // 토큰 만료 시간
 }
 
 model Mentor {

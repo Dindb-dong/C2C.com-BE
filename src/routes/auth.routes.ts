@@ -4,6 +4,8 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '.
 import { LoginRequest, SignupRequest, AuthResponse, RefreshTokenRequest, UpdateUserRequest } from '../types/auth';
 import { authenticateToken, AuthRequest } from '../middleware/auth.middleware';
 import { UserService } from '../services/user.service';
+import crypto from 'crypto';
+import { sendResetEmail } from '@/utils/email';
 
 const router = Router();
 const userService = new UserService();
@@ -83,6 +85,32 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+// 비밀번호 변경 (로그인 필요)
+router.post('/change-password', authenticateToken, async (req: AuthRequest, res: Response) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: '현재 비밀번호와 새 비밀번호가 필요합니다.' });
+  }
+
+  // 현재 로그인된 사용자 정보 조회
+  const user = await userService.findById(req.user?.id || '');
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  // 현재 비밀번호 검증
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) {
+    return res.status(400).json({ error: '현재 비밀번호가 일치하지 않습니다.' });
+  }
+
+  // 새 비밀번호 해시 후 저장
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await userService.updatePasswordAndClearToken(user.id, hashed);
+
+  res.json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+});
+
 // 토큰 갱신
 router.post('/refresh', async (req: Request, res: Response) => {
   try {
@@ -148,6 +176,46 @@ router.put('/my-profile', authenticateToken, async (req: AuthRequest, res: Respo
     console.error('Update user error:', error);
     res.status(500).json({ error: 'Failed to update user information' });
   }
+});
+
+// 비밀번호 재설정 요청 (이메일로 토큰 발송)
+router.post('/request-reset', async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const user = await userService.findByEmail(email);
+  if (!user) {
+    // 보안상 존재하지 않는 이메일이어도 성공 응답
+    return res.json({ message: '입력하신 이메일로 비밀번호 재설정 링크가 전송되었습니다.' });
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiry = new Date(Date.now() + 1000 * 60 * 60); // 1시간 유효
+
+  await userService.setResetToken(email, token, expiry);
+
+  // 이메일로 링크 전송 
+  const resetLink = `https://c2ccom.netlify.app/reset-password?token=${token}`;
+  await sendResetEmail(email, resetLink);
+
+  res.json({ message: '입력하신 이메일로 비밀번호 재설정 링크가 전송되었습니다.' });
+});
+
+router.post('/reset-password', async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: '토큰과 새 비밀번호가 필요합니다.' });
+  }
+
+  // 토큰과 만료시간 검증
+  const user = await userService.findByResetToken(token);
+  if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+    return res.status(400).json({ error: '유효하지 않거나 만료된 토큰입니다.' });
+  }
+
+  // 비밀번호 해시 후 저장
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await userService.updatePasswordAndClearToken(user.id, hashed);
+
+  res.json({ message: '비밀번호가 재설정되었습니다.' });
 });
 
 export default router; 
