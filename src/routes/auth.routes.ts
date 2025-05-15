@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { LoginRequest, SignupRequest, AuthResponse, RefreshTokenRequest, UpdateUserRequest } from '../types/auth';
@@ -9,7 +9,7 @@ const router = Router();
 const userService = new UserService();
 
 // 회원가입
-router.post('/signup', async (req, res) => {
+router.post('/signup', async (req: Request, res: Response) => {
   try {
     const { email, password, name }: SignupRequest = req.body;
 
@@ -45,7 +45,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // 로그인
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password }: LoginRequest = req.body;
 
@@ -84,7 +84,7 @@ router.post('/login', async (req, res) => {
 });
 
 // 토큰 갱신
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', async (req: Request, res: Response) => {
   try {
     const { refreshToken }: RefreshTokenRequest = req.body;
 
@@ -105,7 +105,7 @@ router.post('/refresh', async (req, res) => {
 });
 
 // 현재 사용자 정보 조회
-router.get('/my-profile', authenticateToken, async (req: AuthRequest, res) => {
+router.get('/my-profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const user = await userService.findById(req.user?.id || '');
     if (!user) {
@@ -124,7 +124,7 @@ router.get('/my-profile', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
-router.put('/my-profile', authenticateToken, async (req: AuthRequest, res) => {
+router.put('/my-profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { name, email, password }: UpdateUserRequest = req.body;
     const user = await userService.findById(req.user?.id || '');

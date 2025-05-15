@@ -4,6 +4,9 @@ import { User } from '../types/user.types';
 
 export interface AuthRequest extends Request {
   user?: User;
+  body: any;
+  query: any;
+  headers: any;
 }
 
 export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {

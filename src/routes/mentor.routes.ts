@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { MentorService } from '../services/mentor.service';
 import { authenticateToken, AuthRequest } from '../middleware/auth.middleware';
 import { MentorCreateInput, MentorUpdateInput } from '../types/mentor.types';
@@ -7,7 +7,7 @@ const router = Router();
 const mentorService = new MentorService();
 
 // 멘토 프로필 조회
-router.get('/profile/:id', async (req, res) => {
+router.get('/profile/:id', async (req: AuthRequest, res: Response) => {
   try {
     const mentor = await mentorService.findMentorById(req.params.id);
     if (!mentor) {
@@ -21,7 +21,7 @@ router.get('/profile/:id', async (req, res) => {
 });
 
 // 멘토 프로필 생성 (인증된 사용자만)
-router.post('/profile', authenticateToken, async (req: AuthRequest, res) => {
+router.post('/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const mentorData: MentorCreateInput = {
       ...req.body,
@@ -38,7 +38,7 @@ router.post('/profile', authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // 멘토 프로필 수정 (인증된 사용자만)
-router.put('/profile', authenticateToken, async (req: AuthRequest, res) => {
+router.put('/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const mentor = await mentorService.findMentorByUserId(req.user?.id || '');
     if (!mentor) {
@@ -55,7 +55,7 @@ router.put('/profile', authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // 멘토 목록 조회 (페이지네이션)
-router.get('/list', async (req, res) => {
+router.get('/list', async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -68,7 +68,7 @@ router.get('/list', async (req, res) => {
 });
 
 // 멘토 검색 (전문 분야로 검색)
-router.get('/search', async (req, res) => {
+router.get('/search', async (req: AuthRequest, res: Response) => {
   try {
     const expertise = req.query.expertise as string;
     if (!expertise) {

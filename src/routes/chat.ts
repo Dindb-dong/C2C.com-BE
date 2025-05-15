@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { ChatService } from '../services/chat.service';
 import { ChatRequest, GetChatHistoryRequest } from '../types/chat';
 import { authenticateToken, AuthRequest } from '../middleware/auth.middleware';
@@ -7,7 +7,7 @@ const router = Router();
 const chatService = ChatService.getInstance();
 
 // 채팅 메시지 전송
-router.post('/chat', authenticateToken, async (req: AuthRequest, res) => {
+router.post('/chat', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -43,7 +43,7 @@ router.post('/chat', authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // 채팅 기록 조회
-router.get('/history', authenticateToken, async (req: AuthRequest, res) => {
+router.get('/history', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -87,7 +87,7 @@ router.get('/history', authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // 채팅 기록 삭제
-router.delete('/history', authenticateToken, async (req: AuthRequest, res) => {
+router.delete('/history', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
