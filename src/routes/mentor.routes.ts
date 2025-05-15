@@ -23,6 +23,24 @@ router.get('/profile/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// 내 멘토 프로필 조회 (로그인 필요)
+router.get('/my-profile', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const mentor = await mentorService.findMentorByUserId(userId);
+    if (!mentor) {
+      return res.status(404).json({ error: 'Mentor profile not found' });
+    }
+    res.json(mentor);
+  } catch (error) {
+    console.error('Get my mentor profile error:', error);
+    res.status(500).json({ error: 'Failed to get mentor profile' });
+  }
+});
+
 // 멘토 프로필 생성 (인증된 사용자만)
 router.post('/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
