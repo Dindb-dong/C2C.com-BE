@@ -5,7 +5,7 @@ import { LoginRequest, SignupRequest, AuthResponse, RefreshTokenRequest, UpdateU
 import { authenticateToken, AuthRequest } from '../middleware/auth.middleware';
 import { UserService } from '../services/user.service';
 import crypto from 'crypto';
-import { sendResetEmail } from '@/utils/email';
+import { sendResetEmail } from '../utils/email';
 
 const router = Router();
 const userService = new UserService();
