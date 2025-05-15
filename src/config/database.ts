@@ -11,7 +11,7 @@ const pool = new Pool({
 });
 
 // Test the connection
-pool.connect((err, client, release) => {
+pool.connect((err: Error | undefined, client: PoolClient | undefined, release: (release?: any) => void) => {
   if (err) {
     console.error('Error connecting to the database:', err.stack);
   } else {
