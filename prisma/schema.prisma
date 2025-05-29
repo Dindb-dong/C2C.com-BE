@@ -25,6 +25,8 @@ model User {
   mentor    Mentor?  // User와 Mentor 간의 1:1 관계
   resetToken        String?   // 비밀번호 재설정 토큰
   resetTokenExpiry  DateTime? // 토큰 만료 시간
+  posts    Post[]    // 작성한 게시글
+  comments Comment[] // 작성한 댓글
 }
 
 model Mentor {
@@ -45,4 +47,60 @@ model Mentor {
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
   user               User     @relation(fields: [user_id], references: [id])
+}
+
+model Board {
+  id          String   @id @default(uuid())
+  name        String   // 게시판 이름
+  description String?  // 게시판 설명
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       Post[]   // 게시글 목록
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  title     String    // 게시글 제목
+  content   String    // 게시글 내용
+  category  String    // 게시글 카테고리
+  tags      String[]  // 게시글 태그
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // 관계
+  authorId  String    // 작성자 ID
+  author    User      @relation(fields: [authorId], references: [id])
+  boardId   String    // 게시판 ID
+  board     Board     @relation(fields: [boardId], references: [id])
+  comments  Comment[] // 댓글 목록
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   // 댓글 내용
+  likes     Int      @default(0) // 좋아요 수
+  dislikes  Int      @default(0) // 싫어요 수
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 관계
+  authorId  String   // 작성자 ID
+  author    User     @relation(fields: [authorId], references: [id])
+  postId    String   // 게시글 ID
+  post      Post     @relation(fields: [postId], references: [id])
+}
+
+model NewsArticle {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  summary     String   @db.Text
+  url         String   @unique
+  source      String
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([source])
+  @@index([publishedAt])
 }
