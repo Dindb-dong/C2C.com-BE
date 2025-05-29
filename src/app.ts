@@ -9,6 +9,9 @@ import testRoutes from './routes/test.routes';
 import chatRouter from './routes/chat';
 import authRouter from './routes/auth.routes';
 import mentorRoutes from './routes/mentor.routes';
+import boardRouter from './routes/board.routes';
+import newsRouter from './routes/news.routes';
+import { NewsScheduler } from './schedulers/news.scheduler';
 
 // Load environment variables
 dotenv.config();
@@ -35,7 +38,12 @@ app.use('/api/test', testRoutes);
 app.use('/api', chatRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/mentor', mentorRoutes);
+app.use('/api', boardRouter);
+app.use('/api', newsRouter);
 
+// Start news scheduler
+const newsScheduler = new NewsScheduler();
+newsScheduler.start();
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
