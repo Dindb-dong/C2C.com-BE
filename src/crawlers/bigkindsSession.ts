@@ -80,11 +80,22 @@ export class BigKindsSessionCrawler {
 
   private async initialize() {
     if (!this.browser) {
-      this.browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-      this.page = await this.browser.newPage();
+      try {
+        this.browser = await chromium.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+        });
+        this.page = await this.browser.newPage();
+      } catch (error) {
+        console.error('Failed to launch browser:', error);
+        // Fallback to default chromium installation
+        this.browser = await chromium.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        this.page = await this.browser.newPage();
+      }
     }
   }
 
