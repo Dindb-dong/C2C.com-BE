@@ -12,7 +12,7 @@
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate && npx playwright install chromium"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",

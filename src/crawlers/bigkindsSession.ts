@@ -80,7 +80,10 @@ export class BigKindsSessionCrawler {
 
   private async initialize() {
     if (!this.browser) {
-      this.browser = await chromium.launch({ headless: true });
+      this.browser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
       this.page = await this.browser.newPage();
     }
   }
