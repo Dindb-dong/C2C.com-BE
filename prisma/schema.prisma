@@ -98,9 +98,11 @@ model NewsArticle {
   url         String   @unique
   source      String
   publishedAt DateTime
+  categoryCode String   @default("10000000")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([source])
   @@index([publishedAt])
+  @@index([categoryCode])
 }

@@ -39,7 +39,7 @@ app.use('/api', chatRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/mentor', mentorRoutes);
 app.use('/api', boardRouter);
-app.use('/api', newsRouter);
+app.use('/api/news', newsRouter);
 
 // Start news scheduler
 const newsScheduler = new NewsScheduler();
