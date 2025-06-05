@@ -29,7 +29,7 @@ export class NewsService {
     return !!latestArticle;
   }
 
-  async getTopTopics(categoryCode: string) {
+  async getTopTopics(categoryCode: string, noSearch: boolean) {
     try {
       console.log('categoryCode', categoryCode);
       let category: string;
@@ -65,7 +65,7 @@ export class NewsService {
       const { topicSummary, articles } = await this.crawler.getTopTopics(category);
 
       // 뉴스 저장
-      if (articles.length > 0) {
+      if (articles.length > 0 && !noSearch) {
         await this.storeNewsFromCrawler(articles);
       }
 

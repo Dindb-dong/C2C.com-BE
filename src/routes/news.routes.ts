@@ -58,13 +58,14 @@ router.get('/category/:categoryCode', async (req, res) => {
 router.get('/topics/:categoryCode', async (req, res) => {
   try {
     const { categoryCode } = req.params;
+    const noSearch = req.query.noSearch === 'true';
 
     // 입력값 검증
     if (!categoryCode || !/^\d{9}$/.test(categoryCode)) {
       return res.status(400).json({ error: 'Invalid category code. Must be 8 digits.' });
     }
 
-    const topicSummary = await newsService.getTopTopics(categoryCode);
+    const topicSummary = await newsService.getTopTopics(categoryCode, noSearch);
     res.json(topicSummary);
   } catch (error) {
     console.error('Error fetching top topics:', error);
