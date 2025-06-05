@@ -85,7 +85,7 @@ export class BigKindsSessionCrawler {
         this.browser = await chromium.launch({
           headless: true,
           args: ['--no-sandbox', '--disable-setuid-sandbox'],
-          executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+          executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined
         });
         this.page = await this.browser.newPage();
       } catch (error) {
