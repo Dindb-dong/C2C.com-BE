@@ -1,6 +1,10 @@
 import { chromium, Browser, Page } from 'playwright';
 import axios, { AxiosInstance } from 'axios';
 import { NewsArticle } from '@prisma/client';
+interface TopicSummary {
+  title: string;
+  content: string;
+}
 
 interface Topic {
   topic: string;
@@ -130,7 +134,7 @@ export class BigKindsSessionCrawler {
     }
   }
 
-  async getTopTopics(category: string): Promise<{ topicSummary: String[], articles: NewsArticle[] }> {
+  async getTopTopics(category: string): Promise<{ topicSummary: TopicSummary[], articles: NewsArticle[] }> {
     try {
       await this.initialize();
       await this.login();
@@ -161,14 +165,17 @@ export class BigKindsSessionCrawler {
 
       // 각 토픽에 대한 뉴스를 가져옴
       const allArticles: NewsArticle[] = [];
-      const topicSummary: string[] = [];
+      const topicSummary: TopicSummary[] = [];
       for (const topic of topics) {
         const articles = await this.searchNews({ topic });
         const summary = await this.axiosInstance.post(this.topicListUrl, {
           content: topic.topic
         });
         allArticles.push(...articles);
-        topicSummary.push(summary.data.content);
+        topicSummary.push({
+          title: topic.topic,
+          content: summary.data.content
+        });
       }
 
       return { topicSummary: topicSummary, articles: allArticles };
@@ -253,7 +260,8 @@ export class BigKindsSessionCrawler {
         categoryCode: params.categoryCode || params.topic?.issue_category || '',
         summary: article.CONTENT.substring(0, 200),
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        topic: params.topic?.topic || ''
       }));
     } catch (error) {
       if (axios.isAxiosError(error)) {
