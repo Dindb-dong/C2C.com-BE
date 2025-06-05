@@ -5,9 +5,9 @@ export class NewsService {
   private prisma: PrismaClient;
   private crawler: BigKindsSessionCrawler;
 
-  constructor() {
+  constructor(crawler: BigKindsSessionCrawler) {
     this.prisma = new PrismaClient();
-    this.crawler = new BigKindsSessionCrawler();
+    this.crawler = crawler;
   }
 
   private async hasFetchedToday(categoryCode: string): Promise<boolean> {
@@ -32,24 +32,44 @@ export class NewsService {
   async getTopTopics(categoryCode: string) {
     try {
       console.log('categoryCode', categoryCode);
+      let category: string;
       switch (categoryCode) {
-        case '10000000':
-          return await this.crawler.getTopTopics('정치');
-        case '20000000':
-          return await this.crawler.getTopTopics('경제');
-        case '30000000':
-          return await this.crawler.getTopTopics('사회');
-        case '40000000':
-          return await this.crawler.getTopTopics('문화');
-        case '50000000':
-          return await this.crawler.getTopTopics('국제');
-        case '60000000':
-          return await this.crawler.getTopTopics('지역');
-        case '70000000':
-          return await this.crawler.getTopTopics('스포츠');
-        case '80000000':
-          return await this.crawler.getTopTopics('IT과학');
+        case '001000000':
+          category = '정치';
+          break;
+        case '002000000':
+          category = '경제';
+          break;
+        case '003000000':
+          category = '사회';
+          break;
+        case '004000000':
+          category = '문화';
+          break;
+        case '005000000':
+          category = '국제';
+          break;
+        case '006000000':
+          category = '지역';
+          break;
+        case '007000000':
+          category = '스포츠';
+          break;
+        case '008000000':
+          category = 'IT과학';
+          break;
+        default:
+          throw new Error('Invalid category code');
       }
+
+      const { topicSummary, articles } = await this.crawler.getTopTopics(category);
+
+      // 뉴스 저장
+      if (articles.length > 0) {
+        await this.storeNewsFromCrawler(articles);
+      }
+
+      return { topicSummary, articles };
     } catch (error) {
       console.error('Error fetching top topics:', error);
       throw error;
@@ -60,27 +80,18 @@ export class NewsService {
     const storedArticles = await Promise.all(
       articles.map(async (article) => {
         try {
-          const existingArticle = await this.prisma.newsArticle.findUnique({
-            where: { url: article.url }
-          });
-
-          if (existingArticle) {
-            return this.prisma.newsArticle.update({
-              where: { url: article.url },
-              data: {
-                title: article.title,
-                content: article.content,
-                source: article.source,
-                publishedAt: article.publishedAt,
-                categoryCode: article.categoryCode,
-                summary: article.summary,
-                updatedAt: new Date()
-              }
-            });
-          }
-
-          return this.prisma.newsArticle.create({
-            data: {
+          return await this.prisma.newsArticle.upsert({
+            where: { url: article.url },
+            update: {
+              title: article.title,
+              content: article.content,
+              source: article.source,
+              publishedAt: article.publishedAt,
+              categoryCode: article.categoryCode,
+              summary: article.summary,
+              updatedAt: new Date()
+            },
+            create: {
               title: article.title,
               content: article.content,
               url: article.url,
@@ -150,7 +161,7 @@ export class NewsService {
       if (!shouldFetch) {
         // Fetch and store new articles
         const articles = await this.crawler.searchNews({
-          categoryCode,
+          categoryCode: categoryCode,
           startDate: new Date().toISOString().split('T')[0], // Today
           endDate: new Date().toISOString().split('T')[0]   // Today
         });
@@ -184,5 +195,9 @@ export class NewsService {
       console.error(`Error fetching news for category ${categoryCode}:`, error);
       throw error;
     }
+  }
+
+  async storeNewsFromCrawler(articles: NewsArticle[]): Promise<NewsArticle[]> {
+    return this.storeArticles(articles);
   }
 }

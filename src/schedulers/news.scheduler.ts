@@ -1,23 +1,26 @@
 import cron from 'node-cron';
 import { NewsService } from '../services/news.service';
+import { BigKindsSessionCrawler } from '../crawlers/bigkindsSession';
 
 export class NewsScheduler {
   private newsService: NewsService;
+  private crawler: BigKindsSessionCrawler;
   private readonly categories = [
-    { name: '정치', code: '10000000' },
-    { name: '경제', code: '20000000' },
-    { name: '사회', code: '30000000' },
-    { name: '문화', code: '40000000' },
-    { name: '국제', code: '50000000' },
-    { name: '지역', code: '60000000' },
-    { name: '스포츠', code: '70000000' },
-    { name: 'IT과학', code: '80000000' },
+    { name: '정치', code: '001000000' },
+    { name: '경제', code: '002000000' },
+    { name: '사회', code: '003000000' },
+    { name: '문화', code: '004000000' },
+    { name: '국제', code: '005000000' },
+    { name: '지역', code: '006000000' },
+    { name: '스포츠', code: '007000000' },
+    { name: 'IT과학', code: '008000000' },
   ];
   private readonly maxRetries = 3;
   private readonly retryDelay = 5000; // 5 seconds
 
   constructor() {
-    this.newsService = new NewsService();
+    this.crawler = new BigKindsSessionCrawler();
+    this.newsService = new NewsService(this.crawler);
   }
 
   private async sleep(ms: number): Promise<void> {

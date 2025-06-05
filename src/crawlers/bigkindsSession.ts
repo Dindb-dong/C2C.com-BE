@@ -43,6 +43,7 @@ export class BigKindsSessionCrawler {
   private readonly loginUrl = `${this.baseUrl}/api/account/signin2023.do`;
   private readonly searchUrl = `${this.baseUrl}/api/news/search.do`;
   private readonly issueListUrl = `${this.baseUrl}/v2/home/issue/category/list.do`;
+  private readonly topicListUrl = `${this.baseUrl}/v2/home/getTopicContent.do`;
   private browser: Browser | null = null;
   private page: Page | null = null;
   private axiosInstance: AxiosInstance;
@@ -129,7 +130,7 @@ export class BigKindsSessionCrawler {
     }
   }
 
-  async getTopTopics(category: string): Promise<Topic[]> {
+  async getTopTopics(category: string): Promise<{ topicSummary: String[], articles: NewsArticle[] }> {
     try {
       await this.initialize();
       await this.login();
@@ -145,21 +146,35 @@ export class BigKindsSessionCrawler {
 
       if (!response.data || !Array.isArray(response.data)) {
         console.error('Invalid response format:', response.data);
-        return [];
+        return { topicSummary: [], articles: [] };
       }
 
-      return response.data.map((item: any) => ({
+      const topics = response.data.map((item: any) => ({
         topic: item.todayIssue.topic,
         topic_origin: item.todayIssue.topic_origin,
         topic_content: item.todayIssue.topic_content,
         topic_keyword: item.todayIssue.topic_keyword,
         news_cluster: item.todayIssue.news_cluster,
         SEARCH_QUERY: item.todayIssue.SEARCH_QUERY,
-        issue_category: item.todayIssue.issue_category
+        issue_category: item.todayIssue.issue_category,
       }));
+
+      // 각 토픽에 대한 뉴스를 가져옴
+      const allArticles: NewsArticle[] = [];
+      const topicSummary: string[] = [];
+      for (const topic of topics) {
+        const articles = await this.searchNews({ topic });
+        const summary = await this.axiosInstance.post(this.topicListUrl, {
+          content: topic.topic
+        });
+        allArticles.push(...articles);
+        topicSummary.push(summary.data.content);
+      }
+
+      return { topicSummary: topicSummary, articles: allArticles };
     } catch (error) {
       console.error('Error fetching top topics:', error);
-      return [];
+      return { topicSummary: [], articles: [] };
     }
   }
 
@@ -181,7 +196,7 @@ export class BigKindsSessionCrawler {
 
       const searchPayload: SearchPayload = {
         byLine: '',
-        categoryCodes: [],
+        categoryCodes: [params.topic?.issue_category || params.categoryCode || ''],
         dateCodes: [],
         editorialIs: false,
         endDate: params.endDate || today.toISOString().split('T')[0],
@@ -210,7 +225,7 @@ export class BigKindsSessionCrawler {
       }
 
       if (params.categoryCode) {
-        searchPayload.categoryCodes = [];
+        searchPayload.categoryCodes = [params.categoryCode];
       }
 
       console.log('Request URL:', this.searchUrl);
@@ -235,7 +250,7 @@ export class BigKindsSessionCrawler {
         url: article.PROVIDER_LINK_PAGE,
         source: article.PROVIDER,
         publishedAt: new Date(article.DATE.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')),
-        categoryCode: params.categoryCode || '',
+        categoryCode: params.categoryCode || params.topic?.issue_category || '',
         summary: article.CONTENT.substring(0, 200),
         createdAt: new Date(),
         updatedAt: new Date()

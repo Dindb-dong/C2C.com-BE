@@ -1,8 +1,10 @@
 import express from 'express';
 import { NewsService } from '../services/news.service';
+import { BigKindsSessionCrawler } from '../crawlers/bigkindsSession';
 
 const router = express.Router();
-const newsService = new NewsService();
+const crawler = new BigKindsSessionCrawler();
+const newsService = new NewsService(crawler);
 
 // 최신 뉴스 조회
 router.get('/latest', async (req, res) => {
@@ -31,7 +33,7 @@ router.get('/category/:categoryCode', async (req, res) => {
     const endDate = req.query.endDate as string;
 
     // 입력값 검증
-    if (!categoryCode || !/^\d{8}$/.test(categoryCode)) {
+    if (!categoryCode || !/^\d{9}$/.test(categoryCode)) {
       return res.status(400).json({ error: 'Invalid category code. Must be 8 digits.' });
     }
     if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -58,12 +60,12 @@ router.get('/topics/:categoryCode', async (req, res) => {
     const { categoryCode } = req.params;
 
     // 입력값 검증
-    if (!categoryCode || !/^\d{8}$/.test(categoryCode)) {
+    if (!categoryCode || !/^\d{9}$/.test(categoryCode)) {
       return res.status(400).json({ error: 'Invalid category code. Must be 8 digits.' });
     }
 
-    const topics = await newsService.getTopTopics(categoryCode);
-    res.json(topics);
+    const topicSummary = await newsService.getTopTopics(categoryCode);
+    res.json(topicSummary);
   } catch (error) {
     console.error('Error fetching top topics:', error);
     res.status(500).json({ error: 'Failed to fetch top topics' });
@@ -82,7 +84,7 @@ router.post('/fetch', async (req, res) => {
     if (query && typeof query !== 'string' || query?.trim().length === 0) {
       return res.status(400).json({ error: 'Query must be a non-empty string.' });
     }
-    if (categoryCode && !/^\d{8}$/.test(categoryCode)) {
+    if (categoryCode && !/^\d{9}$/.test(categoryCode)) {
       return res.status(400).json({ error: 'Invalid category code. Must be 8 digits.' });
     }
     if (topic && typeof topic !== 'object') {
