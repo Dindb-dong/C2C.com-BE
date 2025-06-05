@@ -106,3 +106,31 @@ model NewsArticle {
   @@index([publishedAt])
   @@index([categoryCode])
 }
+
+model ChatSession {
+  id          String      @id @default(uuid())
+  userId      String
+  problemId   String?
+  title       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  messages    Message[]
+  metadata    Json?
+
+  @@index([userId])
+  @@index([problemId])
+}
+
+model Message {
+  id            String      @id @default(uuid())
+  sessionId     String
+  role          String
+  content       String      @db.Text
+  createdAt     DateTime    @default(now())
+  tokens        Int?
+  metadata      Json?
+
+  session       ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}

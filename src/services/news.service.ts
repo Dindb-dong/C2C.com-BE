@@ -97,7 +97,7 @@ export class NewsService {
       })
     );
 
-    return storedArticles.filter((article): article is NewsArticle => article !== null);
+    return storedArticles.filter((article: NewsArticle | null): article is NewsArticle => article !== null);
   }
 
   async fetchAndStoreNews(params: {

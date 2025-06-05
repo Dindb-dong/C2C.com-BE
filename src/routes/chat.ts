@@ -6,7 +6,7 @@ import { authenticateToken, AuthRequest } from '../middleware/auth.middleware';
 const router = Router();
 const chatService = ChatService.getInstance();
 
-// 채팅 메시지 전송
+// 채팅 메시지 저장
 router.post('/chat', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -33,8 +33,7 @@ router.post('/chat', authenticateToken, async (req: AuthRequest, res: Response) 
     });
   } catch (error) {
     console.error('Chat API Error:', error);
-    const statusCode = error instanceof Error && error.message.includes('OpenAI') ? 503 : 500;
-    res.status(statusCode).json({
+    res.status(500).json({
       success: false,
       error: 'Failed to process chat request',
       details: error instanceof Error ? error.message : 'Unknown error',

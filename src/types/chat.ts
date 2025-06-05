@@ -4,7 +4,7 @@ export interface ChatMessage {
   id: string;
   userId: string;
   content: string;
-  role: ChatRole;
+  role: 'user' | 'assistant';
   createdAt: Date;
   problemId?: string; // 문제은행의 특정 문제와 연관된 경우
   metadata?: {
@@ -26,14 +26,23 @@ export interface ChatHistory {
   };
 }
 
+export interface ChatSession {
+  id: string;
+  messages: ChatMessage[];
+}
+
 export interface ChatRequest {
-  messages: Omit<ChatMessage, 'id' | 'userId' | 'createdAt' | 'metadata'>[];
+  messages: Array<{
+    role: 'user' | 'assistant';
+    content: string;
+    metadata?: {
+      tokens?: number;
+    };
+  }>;
   model?: string;
   temperature?: number;
   problemId?: string;
-  maxTokens?: number;
-  presencePenalty?: number;
-  frequencyPenalty?: number;
+  sessionId?: string;
 }
 
 export interface ChatResponse {
@@ -55,16 +64,11 @@ export interface GetChatHistoryRequest {
   problemId?: string;
   startDate?: Date;
   endDate?: Date;
-  role?: ChatRole;
+  role?: 'user' | 'assistant' | 'system';
 }
 
 export interface GetChatHistoryResponse {
-  messages: ChatMessage[];
+  sessions: ChatSession[];
   hasMore: boolean;
   total: number;
-  metadata?: {
-    totalPages: number;
-    currentPage: number;
-    itemsPerPage: number;
-  };
 } 
