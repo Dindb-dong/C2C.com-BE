@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
+import path from 'path';
 import testRoutes from './routes/test.routes';
 import chatRouter from './routes/chat';
 import authRouter from './routes/auth.routes';
@@ -14,7 +15,8 @@ import newsRouter from './routes/news.routes';
 import { NewsScheduler } from './schedulers/news.scheduler';
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+console.log('Current working directory:', process.cwd());
 console.log('Environment variables loaded:');
 console.log('PORT:', process.env.PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
