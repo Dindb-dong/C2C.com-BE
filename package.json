@@ -9,10 +9,10 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "build": "echo 'Current directory:' && pwd && echo 'Cleaning dist...' && rm -rf dist && echo 'Running TypeScript compiler...' && tsc --project tsconfig.json && echo 'Build complete. Contents of dist:' && ls -la dist/ || echo 'dist directory not found'",
+    "build": "tsc",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "postinstall": "prisma generate"
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
