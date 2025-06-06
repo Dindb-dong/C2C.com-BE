@@ -66,7 +66,10 @@ io.on('connection', (socket) => {
 });
 
 // Start server
+console.log('Starting server initialization...');
 const PORT = parseInt(process.env.PORT || '3000', 10);
+console.log('Attempting to bind to port:', PORT);
+
 try {
   httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
@@ -75,5 +78,15 @@ try {
   console.error('Failed to start server:', error);
   process.exit(1);
 }
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 export default app; 
