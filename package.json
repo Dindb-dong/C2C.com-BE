@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "build": "echo 'Current directory:' && pwd && echo 'Cleaning dist...' && rm -rf dist && echo 'Running TypeScript compiler...' && tsc --project tsconfig.json --listFiles --listEmittedFiles --pretty && echo 'Build complete. Contents of dist:' && ls -la dist/ || echo 'dist directory not found'",
+    "build": "echo 'Current directory:' && pwd && echo 'Cleaning dist...' && rm -rf dist && echo 'Running TypeScript compiler...' && tsc --project tsconfig.json && echo 'Build complete. Contents of dist:' && ls -la dist/ || echo 'dist directory not found'",
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "postinstall": "prisma generate"
