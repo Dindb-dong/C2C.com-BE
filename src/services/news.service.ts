@@ -2,6 +2,7 @@ import { PrismaClient, NewsArticle } from '@prisma/client';
 import { BigKindsSessionCrawler } from '../crawlers/bigkindsSession';
 import type { TopicSummary } from '@prisma/client';
 import prisma from '../prisma';
+import { batchProcess } from '../batchProcess';
 
 type TopicSummaryInput = Omit<TopicSummary, 'id'>;
 
@@ -70,8 +71,8 @@ export class NewsService {
 
       // 뉴스 저장x
       if (articles.length > 0 && !noSearch) {
-        await this.storeNewsFromCrawler(articles);
         await this.storeTopicSummary(topicSummary);
+        await this.storeNewsFromCrawler(articles);
       }
 
       return { topicSummary, articles };
@@ -82,40 +83,36 @@ export class NewsService {
   }
 
   private async storeArticles(articles: NewsArticle[]): Promise<NewsArticle[]> {
-    const storedArticles = await Promise.all(
-      articles.map(async (article) => {
-        try {
-          return await this.prisma.newsArticle.upsert({
-            where: { url: article.url },
-            update: {
-              title: article.title,
-              content: article.content,
-              source: article.source,
-              publishedAt: article.publishedAt,
-              categoryCode: article.categoryCode,
-              summary: article.summary,
-              updatedAt: new Date(),
-              topic: article.topic
-            },
-            create: {
-              title: article.title,
-              content: article.content,
-              url: article.url,
-              source: article.source,
-              publishedAt: article.publishedAt,
-              categoryCode: article.categoryCode,
-              summary: article.summary,
-              topic: article.topic
-            }
-          });
-        } catch (error) {
-          console.error('Error storing article:', error);
-          return null;
-        }
-      })
-    );
-
-    return storedArticles.filter((article: NewsArticle | null): article is NewsArticle => article !== null);
+    return batchProcess(articles, 5, async (article) => {
+      try {
+        return await this.prisma.newsArticle.upsert({
+          where: { url: article.url },
+          update: {
+            title: article.title,
+            content: article.content,
+            source: article.source,
+            publishedAt: article.publishedAt,
+            categoryCode: article.categoryCode,
+            summary: article.summary,
+            updatedAt: new Date(),
+            topic: article.topic
+          },
+          create: {
+            title: article.title,
+            content: article.content,
+            url: article.url,
+            source: article.source,
+            publishedAt: article.publishedAt,
+            categoryCode: article.categoryCode,
+            summary: article.summary,
+            topic: article.topic
+          }
+        });
+      } catch (error) {
+        console.error('Error storing article:', error);
+        return null;
+      }
+    }).then(results => results.filter((a): a is NewsArticle => a !== null));
   }
 
   async fetchAndStoreNews(params: {
@@ -205,27 +202,24 @@ export class NewsService {
   }
 
   async storeTopicSummary(topicSummaries: TopicSummaryInput[]): Promise<TopicSummary[]> {
-    const results: TopicSummary[] = [];
-    for (const summary of topicSummaries) {
-      const upserted = await this.prisma.topicSummary.upsert({
-        where: { title: summary.title }, // or use another unique field
+    return batchProcess(topicSummaries, 5, async (summary) => {
+      return await this.prisma.topicSummary.upsert({
+        where: { title: summary.title },
         update: {
-          content: summary.content,
+          content: summary.content ?? '',
           categoryCode: summary.categoryCode,
           updatedAt: new Date(),
           createdAt: new Date()
         },
         create: {
           title: summary.title,
-          content: summary.content,
+          content: summary.content ?? '',
           categoryCode: summary.categoryCode,
           updatedAt: new Date(),
           createdAt: new Date()
         }
       });
-      results.push(upserted);
-    }
-    return results;
+    });
   }
 
   async storeNewsFromCrawler(articles: NewsArticle[]): Promise<NewsArticle[]> {
