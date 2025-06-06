@@ -3,7 +3,7 @@ services:
     name: c2c-backend
     env: node
     buildCommand: npm install --include=dev && npx prisma generate && npm run build
-    startCommand: npx prisma migrate deploy && node dist/app.js
+    startCommand: cd dist && npx prisma migrate deploy && node app.js
     envVars:
       - key: NODE_ENV
         value: production
