@@ -2,8 +2,8 @@ services:
   - type: web
     name: c2c-backend
     env: node
-    buildCommand: npm install --include=dev && npx prisma generate && npm run build && echo "=== Build Output ===" && ls -la && echo "=== Dist Contents ===" && ls -la dist/ || echo "dist directory not found"
-    startCommand: npx prisma migrate deploy && node dist/app.js
+    buildCommand: npm install --include=dev && npx prisma generate && npm run build && echo "=== Build Output ===" && ls -la && echo "=== Dist Contents ===" && ls -la dist/ || echo "dist directory not found" && cp -r dist/* . && rm -rf dist
+    startCommand: npx prisma migrate deploy && node app.js
     envVars:
       - key: NODE_ENV
         value: production
