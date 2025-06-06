@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc --project tsconfig.json",
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "postinstall": "prisma generate"
