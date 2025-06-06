@@ -23,6 +23,7 @@ console.log('NODE_ENV:', process.env.NODE_ENV);
 
 // Create Express app
 const app = express();
+const port = parseInt(process.env.PORT || '3000', 10);
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -67,12 +68,12 @@ io.on('connection', (socket) => {
 
 // Start server
 console.log('Starting server initialization...');
-const PORT = parseInt(process.env.PORT || '3000', 10);
-console.log('Attempting to bind to port:', PORT);
+
+console.log('Attempting to bind to port:', port);
 
 try {
-  httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
+  httpServer.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port ${port}`);
   });
 } catch (error) {
   console.error('Failed to start server:', error);
