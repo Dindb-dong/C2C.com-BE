@@ -1,12 +1,16 @@
 import { PrismaClient, NewsArticle } from '@prisma/client';
 import { BigKindsSessionCrawler } from '../crawlers/bigkindsSession';
-import { TopicSummary } from '../crawlers/bigkindsSession';
+import type { TopicSummary } from '@prisma/client';
+import prisma from '../prisma';
+
+type TopicSummaryInput = Omit<TopicSummary, 'id'>;
+
 export class NewsService {
-  private prisma: PrismaClient;
+  private prisma: PrismaClient = prisma;
   private crawler: BigKindsSessionCrawler;
 
   constructor(crawler: BigKindsSessionCrawler) {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
     this.crawler = crawler;
   }
 
@@ -62,9 +66,9 @@ export class NewsService {
           throw new Error('Invalid category code');
       }
 
-      const { topicSummary, articles } = await this.crawler.getTopTopics(category);
+      const { topicSummary, articles } = await this.crawler.getTopTopics(category, categoryCode, noSearch);
 
-      // 뉴스 저장
+      // 뉴스 저장x
       if (articles.length > 0 && !noSearch) {
         await this.storeNewsFromCrawler(articles);
         await this.storeTopicSummary(topicSummary);
@@ -200,19 +204,23 @@ export class NewsService {
     }
   }
 
-  async storeTopicSummary(topicSummaries: TopicSummary[]): Promise<TopicSummary[]> {
+  async storeTopicSummary(topicSummaries: TopicSummaryInput[]): Promise<TopicSummary[]> {
     const results: TopicSummary[] = [];
     for (const summary of topicSummaries) {
       const upserted = await this.prisma.topicSummary.upsert({
         where: { title: summary.title }, // or use another unique field
         update: {
           content: summary.content,
-          updatedAt: new Date()
+          categoryCode: summary.categoryCode,
+          updatedAt: new Date(),
+          createdAt: new Date()
         },
         create: {
           title: summary.title,
           content: summary.content,
-          updatedAt: new Date()
+          categoryCode: summary.categoryCode,
+          updatedAt: new Date(),
+          createdAt: new Date()
         }
       });
       results.push(upserted);

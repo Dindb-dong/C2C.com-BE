@@ -1,7 +1,5 @@
-import { PrismaClient, Board, Post, Comment } from '@prisma/client';
-
-// Prisma 클라이언트를 싱글톤으로 초기화
-const prisma = new PrismaClient();
+import { Board, Post, Comment } from '@prisma/client';
+import prisma from '../prisma';
 
 export class BoardService {
   // 게시판 관련 서비스

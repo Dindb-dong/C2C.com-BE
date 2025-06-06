@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 // import Redis from 'ioredis';
 import { ChatMessage, ChatHistory, ChatRequest, GetChatHistoryRequest, GetChatHistoryResponse } from '../types/chat';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../prisma';
 
 // const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 const CACHE_EXPIRY = 60 * 60 * 24; // 24시간

@@ -1,10 +1,11 @@
 import { chromium, Browser, Page } from 'playwright';
 import axios, { AxiosInstance } from 'axios';
 import { NewsArticle } from '@prisma/client';
-export interface TopicSummary {
-  title: string;
-  content: string;
-}
+import type { TopicSummary } from '@prisma/client';
+import prisma from '../prisma';
+import { startOfDay, endOfDay } from 'date-fns';
+
+type TopicSummaryInput = Omit<TopicSummary, 'id'>;
 
 interface Topic {
   topic: string;
@@ -134,7 +135,36 @@ export class BigKindsSessionCrawler {
     }
   }
 
-  async getTopTopics(category: string): Promise<{ topicSummary: TopicSummary[], articles: NewsArticle[] }> {
+  async getTopTopics(
+    category: string,
+    categoryCode: string,
+    noSearch: boolean
+  ): Promise<{ topicSummary: TopicSummaryInput[], articles: NewsArticle[] }> {
+    if (noSearch) {
+      // 1. 오늘 날짜 기준으로 TopicSummary 조회
+      const today = new Date();
+      const topicSummaries = await prisma.topicSummary.findMany({
+        where: {
+          categoryCode,
+          createdAt: {
+            gte: startOfDay(today),
+            lte: endOfDay(today)
+          }
+        }
+      });
+
+      // 2. 각 title에 대해 NewsArticle 조회
+      const allArticles: NewsArticle[] = [];
+      for (const summary of topicSummaries) {
+        const articles = await prisma.newsArticle.findMany({
+          where: { topic: summary.title }
+        });
+        allArticles.push(...articles);
+      }
+
+      return { topicSummary: topicSummaries, articles: allArticles };
+    }
+
     try {
       await this.initialize();
       await this.login();
@@ -165,7 +195,7 @@ export class BigKindsSessionCrawler {
 
       // 각 토픽에 대한 뉴스를 가져옴
       const allArticles: NewsArticle[] = [];
-      const topicSummary: TopicSummary[] = [];
+      const topicSummary: TopicSummaryInput[] = [];
       for (const topic of topics) {
         const articles = await this.searchNews({ topic });
         const summary = await this.axiosInstance.post(this.topicListUrl, {
@@ -174,7 +204,10 @@ export class BigKindsSessionCrawler {
         allArticles.push(...articles);
         topicSummary.push({
           title: topic.topic,
-          content: summary.data.content
+          content: summary.data.content,
+          categoryCode: categoryCode,
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       }
 

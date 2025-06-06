@@ -1,13 +1,14 @@
+import prisma from '../prisma';
 import { PrismaClient } from '@prisma/client';
 import { Mentor, MentorCreateInput, MentorUpdateInput } from '../types/mentor.types';
 import { UserService } from './user.service';
 
 export class MentorService {
-  private prisma: PrismaClient;
+  private prisma: PrismaClient = prisma;
   private userService: UserService;
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
     this.userService = new UserService();
   }
 
