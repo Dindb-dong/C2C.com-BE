@@ -1,7 +1,7 @@
 import { chromium, Browser, Page } from 'playwright';
 import axios, { AxiosInstance } from 'axios';
 import { NewsArticle } from '@prisma/client';
-interface TopicSummary {
+export interface TopicSummary {
   title: string;
   content: string;
 }
