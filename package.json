@@ -10,10 +10,9 @@
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
     "build": "tsc",
-    "install-deps": "npx playwright install chromium && npx playwright install-deps chromium",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "postinstall": "prisma generate && npx playwright install chromium"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
