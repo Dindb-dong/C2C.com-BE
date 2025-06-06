@@ -68,24 +68,31 @@ io.on('connection', (socket) => {
 
 // Start server
 console.log('Starting server initialization...');
+console.log('Current working directory:', process.cwd());
+console.log('Node environment:', process.env.NODE_ENV);
+console.log('Port from env:', process.env.PORT);
 
 console.log('Attempting to bind to port:', port);
 
 try {
   httpServer.listen(port, '0.0.0.0', () => {
     console.log(`Server is running on port ${port}`);
+  }).on('error', (error: Error) => {
+    console.error('Server failed to start:', error);
+    process.exit(1);
   });
 } catch (error) {
   console.error('Failed to start server:', error);
   process.exit(1);
 }
 
-process.on('uncaughtException', (error) => {
+// Add global error handlers
+process.on('uncaughtException', (error: Error) => {
   console.error('Uncaught Exception:', error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
