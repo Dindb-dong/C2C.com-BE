@@ -15,6 +15,9 @@ import { NewsScheduler } from './schedulers/news.scheduler';
 
 // Load environment variables
 dotenv.config();
+console.log('Environment variables loaded:');
+console.log('PORT:', process.env.PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
 // Create Express app
 const app = express();
@@ -62,9 +65,13 @@ io.on('connection', (socket) => {
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3000', 10);
-console.log(process.env.PORT);
-httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+try {
+  httpServer.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+} catch (error) {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+}
 
 export default app; 
