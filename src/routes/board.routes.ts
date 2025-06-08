@@ -255,4 +255,41 @@ router.post('/boards/:boardId/posts/:postId/comments/:commentId/dislike', authen
   }
 });
 
+// 게시글 좋아요/싫어요 관련 라우트
+router.post('/boards/:boardId/posts/:postId/like', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      console.log(`${req.user?.id}: 인증되지 않은 사용자입니다.`);
+      return res.status(401).json({ message: '인증되지 않은 사용자입니다.' });
+    }
+    const post = await boardService.likePost(
+      req.params.boardId,
+      req.params.postId,
+      req.user.id
+    );
+    console.log(post);
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: '게시글 좋아요 처리에 실패했습니다.' });
+  }
+});
+
+router.post('/boards/:boardId/posts/:postId/dislike', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      console.log(`${req.user?.id}: 인증되지 않은 사용자입니다.`);
+      return res.status(401).json({ message: '인증되지 않은 사용자입니다.' });
+    }
+    const post = await boardService.dislikePost(
+      req.params.boardId,
+      req.params.postId,
+      req.user.id
+    );
+    console.log(post);
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: '게시글 싫어요 처리에 실패했습니다.' });
+  }
+});
+
 export default router; 

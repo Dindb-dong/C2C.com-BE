@@ -314,8 +314,8 @@ export class BoardService {
     const comment = await prisma.comment.findFirst({
       where: {
         id: commentId,
-        postId,
         post: {
+          id: postId,
           boardId
         }
       }
@@ -327,6 +327,169 @@ export class BoardService {
 
     return prisma.comment.update({
       where: { id: commentId },
+      data: {
+        dislikes: {
+          increment: 1
+        }
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+  }
+
+  // 게시글 좋아요/싫어요 관련 서비스
+  async likePost(boardId: string, postId: string, userId: string): Promise<Post> {
+    const post = await prisma.post.findFirst({
+      where: {
+        id: postId,
+        boardId
+      }
+    });
+
+    if (!post) {
+      throw new Error('게시글을 찾을 수 없습니다.');
+    }
+
+    // 이미 좋아요를 눌렀는지 확인
+    const existingLike = await prisma.postLike.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId
+        }
+      }
+    });
+
+    if (existingLike) {
+      throw new Error('이미 좋아요를 누른 게시글입니다.');
+    }
+
+    // 이미 싫어요를 눌렀다면 제거
+    const existingDislike = await prisma.postDislike.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId
+        }
+      }
+    });
+
+    if (existingDislike) {
+      await prisma.postDislike.delete({
+        where: {
+          postId_userId: {
+            postId,
+            userId
+          }
+        }
+      });
+      await prisma.post.update({
+        where: { id: postId },
+        data: {
+          dislikes: {
+            decrement: 1
+          }
+        }
+      });
+    }
+
+    // 좋아요 추가
+    await prisma.postLike.create({
+      data: {
+        postId,
+        userId
+      }
+    });
+
+    return prisma.post.update({
+      where: { id: postId },
+      data: {
+        likes: {
+          increment: 1
+        }
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+  }
+
+  async dislikePost(boardId: string, postId: string, userId: string): Promise<Post> {
+    const post = await prisma.post.findFirst({
+      where: {
+        id: postId,
+        boardId
+      }
+    });
+
+    if (!post) {
+      throw new Error('게시글을 찾을 수 없습니다.');
+    }
+
+    // 이미 싫어요를 눌렀는지 확인
+    const existingDislike = await prisma.postDislike.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId
+        }
+      }
+    });
+
+    if (existingDislike) {
+      throw new Error('이미 싫어요를 누른 게시글입니다.');
+    }
+
+    // 이미 좋아요를 눌렀다면 제거
+    const existingLike = await prisma.postLike.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId
+        }
+      }
+    });
+
+    if (existingLike) {
+      await prisma.postLike.delete({
+        where: {
+          postId_userId: {
+            postId,
+            userId
+          }
+        }
+      });
+      await prisma.post.update({
+        where: { id: postId },
+        data: {
+          likes: {
+            decrement: 1
+          }
+        }
+      });
+    }
+
+    // 싫어요 추가
+    await prisma.postDislike.create({
+      data: {
+        postId,
+        userId
+      }
+    });
+
+    return prisma.post.update({
+      where: { id: postId },
       data: {
         dislikes: {
           increment: 1

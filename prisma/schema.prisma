@@ -9,18 +9,20 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
+  id               String        @id @default(uuid())
+  email            String        @unique
   password         String
   name             String
-  role             String    @default("user")
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  role             String        @default("user")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
   resetToken       String?
   resetTokenExpiry DateTime?
   comments         Comment[]
   mentor           Mentor?
   posts            Post[]
+  postDislikes     PostDislike[]
+  postLikes        PostLike[]
 }
 
 model Mentor {
@@ -53,18 +55,22 @@ model Board {
 }
 
 model Post {
-  id        String    @id @default(uuid())
-  title     String
-  content   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  authorId  String
-  boardId   String
-  category  String
-  tags      String[]
-  comments  Comment[]
-  author    User      @relation(fields: [authorId], references: [id])
-  board     Board     @relation(fields: [boardId], references: [id])
+  id           String        @id @default(uuid())
+  title        String
+  content      String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  authorId     String
+  boardId      String
+  category     String
+  tags         String[]
+  likes        Int           @default(0)
+  dislikes     Int           @default(0)
+  comments     Comment[]
+  author       User          @relation(fields: [authorId], references: [id])
+  board        Board         @relation(fields: [boardId], references: [id])
+  postDislikes PostDislike[]
+  postLikes    PostLike[]
 }
 
 model Comment {
@@ -137,4 +143,30 @@ model Message {
   session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model PostDislike {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }
