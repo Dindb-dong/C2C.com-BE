@@ -44,6 +44,8 @@ export interface ChatRequest {
   problemId?: string;
   sessionId?: string;
   title?: string;
+  question?: string;
+  answer?: string;
 }
 
 export interface ChatResponse {
