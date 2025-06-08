@@ -23,6 +23,8 @@ model User {
   posts            Post[]
   postDislikes     PostDislike[]
   postLikes        PostLike[]
+  commentLikes     CommentLike[]
+  commentDislikes  CommentDislike[]
 }
 
 model Mentor {
@@ -74,16 +76,18 @@ model Post {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
-  content   String
-  likes     Int      @default(0)
-  dislikes  Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  authorId  String
-  postId    String
-  author    User     @relation(fields: [authorId], references: [id])
-  post      Post     @relation(fields: [postId], references: [id])
+  id            String          @id @default(uuid())
+  content       String
+  likes         Int            @default(0)
+  dislikes      Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  authorId      String
+  postId        String
+  author        User           @relation(fields: [authorId], references: [id])
+  post          Post           @relation(fields: [postId], references: [id])
+  commentLikes  CommentLike[]
+  commentDislikes CommentDislike[]
 }
 
 model NewsArticle {
@@ -168,5 +172,31 @@ model PostDislike {
 
   @@unique([postId, userId])
   @@index([postId])
+  @@index([userId])
+}
+
+model CommentLike {
+  id        String   @id @default(uuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+model CommentDislike {
+  id        String   @id @default(uuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@index([commentId])
   @@index([userId])
 }

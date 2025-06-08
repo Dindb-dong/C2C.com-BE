@@ -292,6 +292,57 @@ export class BoardService {
       throw new Error('댓글을 찾을 수 없습니다.');
     }
 
+    // 이미 좋아요를 눌렀는지 확인
+    const existingLike = await prisma.commentLike.findUnique({
+      where: {
+        commentId_userId: {
+          commentId,
+          userId
+        }
+      }
+    });
+
+    if (existingLike) {
+      throw new Error('이미 좋아요를 누른 댓글입니다.');
+    }
+
+    // 이미 싫어요를 눌렀다면 제거
+    const existingDislike = await prisma.commentDislike.findUnique({
+      where: {
+        commentId_userId: {
+          commentId,
+          userId
+        }
+      }
+    });
+
+    if (existingDislike) {
+      await prisma.commentDislike.delete({
+        where: {
+          commentId_userId: {
+            commentId,
+            userId
+          }
+        }
+      });
+      await prisma.comment.update({
+        where: { id: commentId },
+        data: {
+          dislikes: {
+            decrement: 1
+          }
+        }
+      });
+    }
+
+    // 좋아요 추가
+    await prisma.commentLike.create({
+      data: {
+        commentId,
+        userId
+      }
+    });
+
     return prisma.comment.update({
       where: { id: commentId },
       data: {
@@ -324,6 +375,57 @@ export class BoardService {
     if (!comment) {
       throw new Error('댓글을 찾을 수 없습니다.');
     }
+
+    // 이미 싫어요를 눌렀는지 확인
+    const existingDislike = await prisma.commentDislike.findUnique({
+      where: {
+        commentId_userId: {
+          commentId,
+          userId
+        }
+      }
+    });
+
+    if (existingDislike) {
+      throw new Error('이미 싫어요를 누른 댓글입니다.');
+    }
+
+    // 이미 좋아요를 눌렀다면 제거
+    const existingLike = await prisma.commentLike.findUnique({
+      where: {
+        commentId_userId: {
+          commentId,
+          userId
+        }
+      }
+    });
+
+    if (existingLike) {
+      await prisma.commentLike.delete({
+        where: {
+          commentId_userId: {
+            commentId,
+            userId
+          }
+        }
+      });
+      await prisma.comment.update({
+        where: { id: commentId },
+        data: {
+          likes: {
+            decrement: 1
+          }
+        }
+      });
+    }
+
+    // 싫어요 추가
+    await prisma.commentDislike.create({
+      data: {
+        commentId,
+        userId
+      }
+    });
 
     return prisma.comment.update({
       where: { id: commentId },
