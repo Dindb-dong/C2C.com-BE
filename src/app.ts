@@ -7,7 +7,7 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import path from 'path';
 import testRoutes from './routes/test.routes';
-import chatRouter from './routes/chat';
+import chatRouter from './routes/chat.routes';
 import authRouter from './routes/auth.routes';
 import mentorRoutes from './routes/mentor.routes';
 import boardRouter from './routes/board.routes';

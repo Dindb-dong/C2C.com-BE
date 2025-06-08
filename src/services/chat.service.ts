@@ -33,13 +33,19 @@ export class ChatService {
           id: request.sessionId || uuidv4(),
           userId,
           problemId: request.problemId,
+          title: request.title || 'New Chat',
+          question: request.messages[0].content,
+          answer: request.messages[1]?.content || '',
           metadata: {
             model: request.model,
             temperature: request.temperature
           }
         },
         update: {
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          title: request.title,
+          question: request.messages[0].content,
+          answer: request.messages[1]?.content || ''
         }
       });
 

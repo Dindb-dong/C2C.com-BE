@@ -43,6 +43,7 @@ export interface ChatRequest {
   temperature?: number;
   problemId?: string;
   sessionId?: string;
+  title?: string;
 }
 
 export interface ChatResponse {
