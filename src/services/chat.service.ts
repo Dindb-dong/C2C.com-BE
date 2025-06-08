@@ -34,8 +34,8 @@ export class ChatService {
           userId,
           problemId: request.problemId,
           title: request.title || 'New Chat',
-          question: request.messages[0].content,
-          answer: request.messages[1]?.content || '',
+          question: request.question || '',
+          answer: request.answer || '',
           metadata: {
             model: request.model,
             temperature: request.temperature
@@ -44,8 +44,8 @@ export class ChatService {
         update: {
           updatedAt: new Date(),
           title: request.title,
-          question: request.messages[0].content,
-          answer: request.messages[1]?.content || ''
+          question: request.question || '',
+          answer: request.answer || ''
         }
       });
 
